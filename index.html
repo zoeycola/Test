@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		#c{
+			border: 1px solid red;
+		}
+	</style>
+</head>
+<body>
+	<canvas width="800" height="600" id="c"></canvas>
+
+	<script src="sky.js"></script>
+	<script src="bird.js"></script>
+	<script>
+		var cas = document.querySelector("#c");
+		var ctx = cas.getContext("2d");
+
+		function loadImg(imgArr, callback){
+			var count = 0;
+			var imgList = {};
+			for(var i = 0; i < imgArr.length; i++){
+				var img = new Image();
+				imgList[imgArr[i]] = img;
+				img.src = "imgs/" + imgArr[i] + ".png";
+				img.onload = function(){
+					count ++;
+					if(count >= imgArr.length){
+						callback(imgList);
+					}
+				}
+			}
+		}
+
+		var imgs = ["birds", "sky"];
+
+		loadImg(imgs, function(imgList){
+			var birdImg = imgList["birds"];
+			var skyImg = imgList["sky"];
+
+			//创建小鸟对象
+			var bird = new Bird({
+				x: 100,
+				y: 100,
+				img: birdImg,
+				ctx: ctx
+			});
+
+			//创建天空对象
+			var sky1 = new Sky({
+				img: skyImg,
+				x: 0,
+				y: 0,
+				ctx: ctx
+			});
+
+			var sky2 = new Sky({
+				img: skyImg,
+				x: skyImg.width,
+				y: 0,
+				ctx: ctx
+			});
+
+
+			//初始化时间
+			var currentTime = new Date();
+			var lastTime = new Date();
+
+			//帧动画
+			function render(){
+				//时间的计算
+				//获取当前帧的时间
+				currentTime = new Date();
+				//时间差= 当前帧的时间 - 上一帧的时间
+				var deltaTime = currentTime - lastTime;
+				//将当前帧的事件设置为lastTime
+				lastTime = currentTime;
+				ctx.clearRect(0, 0, cas.width, cas.height);
+				
+				sky1.draw();
+				sky2.draw();
+
+				bird.draw(deltaTime);
+				requestAnimationFrame(render);
+			}
+			render();
+
+
+			cas.onclick = function(){
+				bird.speed = - 0.3;
+			}
+		});
+
+	</script>
+</body>
+</html>
